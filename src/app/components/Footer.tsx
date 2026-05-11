@@ -1,134 +1,48 @@
-import { Car, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 import { Link } from "react-router";
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 rounded-lg">
-                <Car className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-white">U-Go</span>
-            </Link>
-            <p className="text-sm text-gray-400">
-              Conectando universitários de forma inteligente, segura e 
-              sustentável. Tecnologia a favor do meio ambiente.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-white mb-4">Projeto</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="#features" className="hover:text-green-400 transition-colors">
-                  Recursos
-                </a>
-              </li>
-              <li>
-                <a href="#how-it-works" className="hover:text-green-400 transition-colors">
-                  Como Funciona
-                </a>
-              </li>
-              <li>
-                <a href="#innovation" className="hover:text-green-400 transition-colors">
-                  Inovação
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  FAQ
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-white mb-4">Estudantes</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link to="/sobre" className="hover:text-green-400 transition-colors">
-                  Sobre Nós
-                </Link>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  Carreiras
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  Contato
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-white mb-4">Legal</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  Termos de Uso
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  Política de Privacidade
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  LGPD
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  Segurança
-                </a>
-              </li>
-            </ul>
-          </div>
+    <footer className="bg-gray-900 border-t border-gray-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        {/* Bloco Superior: Identidade e Missão */}
+        <div className="flex flex-col gap-3 max-w-3xl">
+          <Link to="/" className="w-fit">
+            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+              U-Go
+            </span>
+          </Link>
+          <p className="text-sm text-gray-400 leading-relaxed">
+            Conectando universitários de forma inteligente, segura e sustentável. Tecnologia a favor do meio ambiente.
+          </p>
         </div>
 
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-gray-400">
+        {/* Bloco Inferior: Divisória, Links e Copyright */}
+        {/* Reduzi o mt-12 para mt-8 e o pt-8 para pt-6 para aproximar a linha */}
+        <div className="mt-8 pt-6 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
+          
+          {/* Esquerda: Links Rápidos */}
+          <nav className="flex flex-wrap justify-center md:justify-start items-center gap-3 text-sm font-normal text-gray-400">
+            <a href="#" className="hover:text-green-500 transition-colors">
+              Feedback
+            </a>
+            <span className="text-gray-600 text-[10px]">&#8226;</span>
+            <a href="#" className="hover:text-green-500 transition-colors">
+              Termos de Uso
+            </a>
+            <span className="text-gray-600 text-[10px]">&#8226;</span>
+            <a href="#" className="hover:text-green-500 transition-colors">
+              Política de Privacidade
+            </a>
+          </nav>
+
+          {/* Direita: Copyright */}
+          <p className="text-sm text-gray-500 text-center md:text-right">
             © 2026 U-Go. Todos os direitos reservados.
           </p>
-          <div className="flex gap-4">
-            <a
-              href="#"
-              className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
-            >
-              <Facebook className="w-5 h-5" />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
-            >
-              <Instagram className="w-5 h-5" />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
-            >
-              <Twitter className="w-5 h-5" />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
-            >
-              <Linkedin className="w-5 h-5" />
-            </a>
-          </div>
+
         </div>
+
       </div>
     </footer>
   );

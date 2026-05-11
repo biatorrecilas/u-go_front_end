@@ -1,84 +1,96 @@
-import { UserPlus, Search, Car, Star } from "lucide-react";
-import { motion } from "motion/react";
+import { EyeOff, Bell, UserCheck, MessageCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 const steps = [
   {
-    icon: UserPlus,
+    icon: EyeOff,
     number: "01",
-    title: "Cadastre-se",
-    description:
-      "Crie sua conta com seu e-mail universitário e complete seu perfil em minutos.",
+    title: "Visibilidade Restrita",
+    description: "A carona fica pública apenas no nível de rota e condições da viagem (origem, destino, data, hora, vagas, valor e observações).",
   },
   {
-    icon: Search,
+    icon: Bell,
     number: "02",
-    title: "Busque ou Ofereça",
-    description:
-      "Procure caronas disponíveis ou ofereça lugares vazios no seu carro.",
+    title: "Solicitação",
+    description: "Você solicita a carona como passageiro. O motorista recebe uma notificação com a informação de quem solicitou e pode aprovar ou recusar.",
   },
   {
-    icon: Car,
+    icon: UserCheck,
     number: "03",
-    title: "Confirme a Viagem",
-    description:
-      "Conecte-se com colegas, combine detalhes e confirme sua carona.",
+    title: "Revelação e Decisão",
+    description: "Se o motorista aprovar, o solicitante recebe uma notificação com o perfil do motorista e pode confirmar ou desistir.",
   },
   {
-    icon: Star,
+    icon: MessageCircle,
     number: "04",
-    title: "Avalie",
-    description:
-      "Após a viagem, avalie sua experiência e ajude a comunidade a crescer.",
+    title: "Match Fechado!",
+    description: "Só depois da dupla confirmação o match é fechado e os dois podem acessar o contato por WhatsApp.",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-16 md:py-24 bg-gray-50">
+    <section id="how-it-works" className="py-16 md:py-24 bg-white border-t border-gray-100 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Como funciona?
+            Simples, rápido e feito para estudantes!
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Começar a usar o U-Go é simples e rápido. Siga estes passos e
-            comece a economizar hoje mesmo.
+            Um processo sequencial de dupla confirmação desenhado para garantir privacidade e confiança antes da viagem.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {steps.map((step, index) => (
+        <div className="relative">
+          {/* Linha de conexão tech animada (apenas desktop) */}
+          <div className="hidden lg:block absolute top-[3.5rem] left-[5%] right-[15%] h-[2px] bg-gray-100 z-0">
             <motion.div
-              key={step.number}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ width: "0%" }}
+              whileInView={{ width: "100%" }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="relative"
-            >
-              <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow h-full">
-                <div className="text-5xl font-bold text-blue-100 mb-4">
-                  {step.number}
+              transition={{ duration: 1.5, ease: "easeInOut", delay: 0.2 }}
+              className="h-full bg-green-300"
+            />
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+            {steps.map((step, index) => (
+              <motion.div
+                key={step.number}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="relative z-10 flex flex-col group"
+              >
+                {/* Header do passo: Número gigante e Ícone, com fundo branco para quebrar a linha */}
+                <div className="flex items-center gap-4 mb-6 bg-white pr-4 self-start">
+                  <div className="text-6xl lg:text-8xl font-black text-green-300 tracking-tighter transition-transform duration-300 group-hover:scale-105 group-hover:text-green-400">
+                    {step.number}
+                  </div>
+                  <div className="flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-gray-50 border border-gray-100 text-gray-400 shadow-sm transition-colors duration-300 group-hover:bg-green-50 group-hover:text-green-500 group-hover:border-green-200">
+                    <step.icon size={24} strokeWidth={2} />
+                  </div>
                 </div>
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-                  <step.icon className="w-6 h-6 text-white" />
+                
+                {/* Textos sem card em volta, visual limpo e direto */}
+                <div className="pl-1 lg:pl-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {step.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600">{step.description}</p>
-              </div>
-              {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-blue-200" />
-              )}
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

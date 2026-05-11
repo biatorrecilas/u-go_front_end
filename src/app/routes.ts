@@ -1,7 +1,6 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, redirect } from "react-router";
 import { Home } from "./pages/Home";
 import { Profile } from "./pages/Profile";
-import { Signup } from "./pages/Signup";
 import { Login } from "./pages/Login";
 import { About } from "./pages/About";
 import { CreateRide } from "./pages/CreateRide";
@@ -19,7 +18,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/cadastro",
-    Component: Signup,
+    loader: () => redirect("/login?mode=signup"),
   },
   {
     path: "/login",

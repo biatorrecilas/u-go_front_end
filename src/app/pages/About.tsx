@@ -13,10 +13,10 @@ import {
   TrendingUp,
   Globe,
   Zap,
-  Sparkles
+  Sparkles,
+  Linkedin // Ícone adicionado
 } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { Link } from "react-router";
 
 export function About() {
   const stats = [
@@ -53,56 +53,113 @@ export function About() {
     },
   ];
 
+  // Função para gerar o avatar cinza dinâmico
+  const getAvatar = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=e2e8f0&color=64748b&size=400`;
+
+  // Array expandido para 11 membros
   const team = [
     {
-      name: "Maria Costa",
-      role: "CEO & Fundadora",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-      bio: "Engenheira Ambiental com paixão por sustentabilidade",
+      name: "Membro 1",
+      role: "CEO & Fundador(a)",
+      image: getAvatar("Membro 1"),
+      bio: "Especialista em visão estratégica e liderança do projeto.",
+      linkedin: "#",
     },
     {
-      name: "João Santos",
+      name: "Membro 2",
       role: "CTO",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-      bio: "Especialista em desenvolvimento de sistemas inteligentes",
+      image: getAvatar("Membro 2"),
+      bio: "Responsável por toda a arquitetura e desenvolvimento do sistema.",
+      linkedin: "#",
     },
     {
-      name: "Ana Oliveira",
+      name: "Membro 3",
       role: "Head de Design",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
-      bio: "Designer UX focada em experiências inclusivas",
+      image: getAvatar("Membro 3"),
+      bio: "Focado em criar as melhores experiências para os usuários (UX/UI).",
+      linkedin: "#",
     },
     {
-      name: "Pedro Lima",
+      name: "Membro 4",
       role: "Head de Operações",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-      bio: "Especialista em logística e otimização de rotas",
+      image: getAvatar("Membro 4"),
+      bio: "Cuida da logística, escalabilidade e processos diários.",
+      linkedin: "#",
+    },
+    {
+      name: "Membro 5",
+      role: "Desenvolvedor(a) Frontend",
+      image: getAvatar("Membro 5"),
+      bio: "Transforma design em interfaces interativas e responsivas.",
+      linkedin: "#",
+    },
+    {
+      name: "Membro 6",
+      role: "Desenvolvedor(a) Backend",
+      image: getAvatar("Membro 6"),
+      bio: "Garante a segurança, rotas e banco de dados da plataforma.",
+      linkedin: "#",
+    },
+    {
+      name: "Membro 7",
+      role: "Engenheiro(a) de Dados",
+      image: getAvatar("Membro 7"),
+      bio: "Estrutura as métricas de carbono e inteligência de rotas.",
+      linkedin: "#",
+    },
+    {
+      name: "Membro 8",
+      role: "Marketing & Growth",
+      image: getAvatar("Membro 8"),
+      bio: "Focado em aquisição de usuários e expansão da comunidade.",
+      linkedin: "#",
+    },
+    {
+      name: "Membro 9",
+      role: "Community Manager",
+      image: getAvatar("Membro 9"),
+      bio: "Faz a ponte entre a plataforma e as necessidades dos universitários.",
+      linkedin: "#",
+    },
+    {
+      name: "Membro 10",
+      role: "QA & Testes",
+      image: getAvatar("Membro 10"),
+      bio: "Assegura que todas as funcionalidades rodem sem bugs.",
+      linkedin: "#",
+    },
+    {
+      name: "Membro 11",
+      role: "Analista de Sustentabilidade",
+      image: getAvatar("Membro 11"),
+      bio: "Valida os impactos ambientais e métricas sustentáveis.",
+      linkedin: "#",
     },
   ];
 
   const milestones = [
     {
-      year: "2024",
+      year: "2026.1",
       title: "Fundação",
       description: "U-Go nasceu com a missão de tornar o transporte universitário mais sustentável",
       icon: Sparkles,
     },
     {
-      year: "2025",
+      year: "2026.2",
       title: "Expansão",
-      description: "Alcançamos 1.000 usuários ativos e parcerias com 3 universidades",
+      description: "Alcançar usuários ativos e consolidação da comunidade na USF",
       icon: TrendingUp,
     },
     {
-      year: "2026",
+      year: "2027",
       title: "Consolidação",
-      description: "Mais de 2.500 estudantes conectados e 3.2 toneladas de CO₂ economizadas",
+      description: "Mais estudantes conectados e CO₂ economizados",
       icon: Award,
     },
     {
       year: "Futuro",
       title: "Visão Global",
-      description: "Expandir para todas as universidades do Brasil e promover impacto ambiental em escala",
+      description: "Expandir para mais universidades ao redor e promover impacto ambiental em escala",
       icon: Globe,
     },
   ];
@@ -124,10 +181,6 @@ export function About() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full mb-6">
-              <Leaf className="w-4 h-4" />
-              <span className="text-sm font-medium">Sobre o U-Go</span>
-            </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
               Transformando mobilidade em{" "}
@@ -236,7 +289,7 @@ export function About() {
                   <span className="font-bold text-gray-900 text-lg">156 árvores</span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  Impacto equivalente das nossas caronas compartilhadas
+                  Impacto equivalente de caronas compartilhadas
                 </p>
               </div>
             </motion.div>
@@ -305,7 +358,6 @@ export function About() {
           </motion.div>
 
           <div className="relative">
-            {/* Timeline line */}
             <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-green-500 via-emerald-500 to-teal-500 hidden md:block"></div>
 
             <div className="space-y-12">
@@ -342,7 +394,7 @@ export function About() {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Team Section Atualizada */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-green-50">
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -367,10 +419,10 @@ export function About() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                transition={{ duration: 0.5, delay: index * 0.05 }} // delay reduzido para carregar os 11 mais fluidos
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col max-w-[260px] mx-auto"
               >
-                <div className="relative h-64">
+                <div className="relative h-52">
                   <ImageWithFallback
                     src={member.image}
                     alt={member.name}
@@ -378,45 +430,29 @@ export function About() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 </div>
-                <div className="p-6">
-                  <h3 className="font-bold text-gray-900 mb-1">{member.name}</h3>
-                  <p className="text-sm text-green-600 font-medium mb-2">{member.role}</p>
-                  <p className="text-sm text-gray-600">{member.bio}</p>
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-bold text-gray-900 mb-1">{member.name}</h3>
+                      <p className="text-xs text-green-600 font-bold uppercase tracking-wider">{member.role}</p>
+                    </div>
+                    {/* Link do LinkedIn */}
+                    <a 
+                      href={member.linkedin} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-gray-400 hover:text-green-600 transition-colors p-1"
+                      title={`LinkedIn de ${member.name}`}
+                    >
+                      <Linkedin className="w-5 h-5" />
+                    </a>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">{member.bio}</p>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="max-w-4xl mx-auto text-center bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-12 text-white relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-          
-          <div className="relative z-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Faça Parte Dessa Mudança
-            </h2>
-            <p className="text-lg mb-8 opacity-90">
-              Junte-se a estudantes da USF que já estão fazendo a diferença
-            </p>
-            <Link
-              to="/cadastro"
-              className="inline-flex items-center gap-2 bg-white text-green-600 px-8 py-4 rounded-full font-medium hover:bg-gray-100 transition-colors shadow-lg"
-            >
-              <Sparkles className="w-5 h-5" />
-              Cadastre-se gratuitamente
-            </Link>
-          </div>
-        </motion.div>
       </section>
 
       <Footer />

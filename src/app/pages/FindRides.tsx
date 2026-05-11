@@ -1,680 +1,636 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
-  MapPin, 
-  Calendar, 
-  Clock, 
-  Users, 
-  DollarSign,
-  Shield,
-  Sparkles,
-  Navigation,
-  User,
-  Star,
-  TrendingUp,
-  Filter,
-  Search,
-  Check,
-  Car,
-  Bike,
-  Truck,
-  Bus
+  MapPin, Calendar, Clock, Users, Shield, Navigation, 
+  User, TrendingUp, Search, Check, Car, Bike, X, Map, Lock, DollarSign, Sparkles, CheckCircle2
 } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import React from "react";
+import { toast } from "sonner";
+import { saveRequestedRide } from "../rideRequests";
+import { RideMatchGame } from "../components/RideMatchGame";
 
-// Mock data - caronas disponíveis
+// Mock data focado apenas na rota (identidade oculta e apenas carro/moto)
 const availableRides = [
   {
     id: 1,
-    driver: "Motorista Anônimo",
-    driverInitials: "MA",
     from: "Centro - Campinas",
     to: "USF Sagrado",
     date: "2026-03-21",
     time: "07:30",
     vehicleType: "car",
-    vehicleModel: "Honda Fit 2022",
-    licensePlate: "ABC1D23",
     totalSeats: 4,
     availableSeats: [1, 3],
-    occupiedSeats: [2, 4],
     price: 5.00,
-    distance: "12 km",
-    duration: "25 min",
-    womenOnly: false,
-    recurring: ["seg", "qua", "sex"],
-    badges: ["eco-warrior", "punctual"],
-    rating: 4.8,
-    trips: 45,
-    notes: "Ponto de encontro: em frente ao Parque Portugal",
-    whatsapp: "19999999999",
-    recommended: true,
-    matchScore: 95,
+    exclusiveTo: "none",
+    notes: "Ponto de encontro: em frente ao Parque Portugal. Saio pontualmente.",
+    recommended: true, // Sugestão inteligente antes da busca
   },
   {
     id: 2,
-    driver: "Motorista Anônimo",
-    driverInitials: "MB",
     from: "Shopping Iguatemi",
     to: "USF Sagrado",
     date: "2026-03-21",
     time: "07:45",
-    vehicleType: "suv",
-    vehicleModel: "Chevrolet Spin 2021",
-    licensePlate: "DEF4G56",
-    totalSeats: 6,
-    availableSeats: [2, 4, 5],
-    occupiedSeats: [1, 3, 6],
+    vehicleType: "car",
+    totalSeats: 4,
+    availableSeats: [2],
     price: 4.50,
-    distance: "8 km",
-    duration: "18 min",
-    womenOnly: true,
-    recurring: ["seg", "ter", "qua", "qui", "sex"],
-    badges: ["green-champion", "friendly"],
-    rating: 4.9,
-    trips: 78,
-    notes: "Carona exclusiva para mulheres. Música ambiente.",
-    whatsapp: "19988888888",
-    recommended: true,
-    matchScore: 88,
+    exclusiveTo: "women",
+    notes: "Carona exclusiva para mulheres. Costumo ir ouvindo um podcast levinho.",
+    recommended: false,
   },
   {
     id: 3,
-    driver: "Motorista Anônimo",
-    driverInitials: "MC",
     from: "Taquaral",
     to: "USF Sagrado",
     date: "2026-03-21",
     time: "08:00",
     vehicleType: "car",
-    vehicleModel: "Hyundai HB20 2020",
-    licensePlate: "GHI7J89",
     totalSeats: 4,
     availableSeats: [3],
-    occupiedSeats: [1, 2, 4],
     price: 6.00,
-    distance: "10 km",
-    duration: "22 min",
-    womenOnly: false,
-    recurring: ["seg", "qua"],
-    badges: ["reliable"],
-    rating: 4.7,
-    trips: 32,
-    notes: "Ar-condicionado sempre ligado",
-    whatsapp: "19977777777",
+    exclusiveTo: "none",
+    notes: "Ar-condicionado sempre ligado.",
     recommended: false,
-    matchScore: 72,
   },
   {
     id: 4,
-    driver: "Motorista Anônimo",
-    driverInitials: "MD",
     from: "Cambuí",
     to: "USF Sagrado",
     date: "2026-03-21",
     time: "07:15",
     vehicleType: "motorcycle",
-    vehicleModel: "Yamaha Fazer 250",
-    licensePlate: "JKL2M34",
     totalSeats: 1,
     availableSeats: [1],
-    occupiedSeats: [],
     price: 5.50,
-    distance: "11 km",
-    duration: "20 min",
-    womenOnly: false,
-    recurring: ["seg", "ter", "qui", "sex"],
-    badges: ["eco-warrior"],
-    rating: 4.6,
-    trips: 28,
-    notes: "",
-    whatsapp: "19966666666",
-    recommended: false,
-    matchScore: 65,
+    exclusiveTo: "none",
+    notes: "Tenho capacete extra. Apenas garupa.",
+    recommended: true, // Sugestão inteligente antes da busca
   },
 ];
 
-const badgeInfo: Record<string, { icon: string; label: string; color: string }> = {
-  "eco-warrior": { icon: "🌱", label: "Guerreiro Eco", color: "bg-green-100 text-green-700" },
-  "green-champion": { icon: "🏆", label: "Campeão Verde", color: "bg-emerald-100 text-emerald-700" },
-  "punctual": { icon: "⏰", label: "Pontual", color: "bg-blue-100 text-blue-700" },
-  "friendly": { icon: "😊", label: "Amigável", color: "bg-yellow-100 text-yellow-700" },
-  "reliable": { icon: "✓", label: "Confiável", color: "bg-purple-100 text-purple-700" },
-};
-
 const vehicleIcons: Record<string, any> = {
   car: Car,
-  suv: Bus,
   motorcycle: Bike,
 };
 
+type AvailableRide = (typeof availableRides)[number];
+
 export function FindRides() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({
     origin: "",
-    destination: "USF Sagrado",
+    destination: "",
     date: "",
-    womenOnly: false,
+    time: "",
+    exclusiveTo: "none",
   });
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [selectedRide, setSelectedRide] = useState<AvailableRide | null>(null);
+  const [showSecurityModal, setShowSecurityModal] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
+  const [carFinalX, setCarFinalX] = useState(160);
+  const carTrackRef = useRef<HTMLDivElement | null>(null);
 
-  const filteredRides = availableRides.filter((ride) => {
-    if (filters.origin && !ride.from.toLowerCase().includes(filters.origin.toLowerCase())) {
-      return false;
-    }
-    if (filters.destination && ride.to !== filters.destination) {
-      return false;
-    }
-    if (filters.date && ride.date !== filters.date) {
-      return false;
-    }
-    if (filters.womenOnly && !ride.womenOnly) {
-      return false;
-    }
-    return true;
-  });
+  const isSearching = filters.origin || filters.destination || filters.date || filters.time || filters.exclusiveTo !== "none";
 
-  const recommendedRides = filteredRides.filter(ride => ride.recommended);
-  const otherRides = filteredRides.filter(ride => !ride.recommended);
+  useEffect(() => {
+    const container = carTrackRef.current;
+    if (!container) {
+      return;
+    }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
-      <Header />
-      
-      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-8"
-          >
-            <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full mb-4">
-              <Search className="w-4 h-4" />
-              <span className="text-sm font-medium">Encontrar Caronas</span>
+    const updateCarPosition = () => {
+      const nextFinalX = Math.max(container.offsetWidth / 2 - 100, 56);
+      setCarFinalX(nextFinalX);
+    };
+
+    updateCarPosition();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(() => updateCarPosition());
+      observer.observe(container);
+
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener("resize", updateCarPosition);
+    return () => window.removeEventListener("resize", updateCarPosition);
+  }, []);
+
+  // Lógica Inteligente: Se buscou, filtra exato. Se não buscou, mostra as recomendadas pelo perfil.
+  const recommendedRides = isSearching 
+    ? availableRides.filter((ride) => {
+        if (filters.origin && !ride.from.toLowerCase().includes(filters.origin.toLowerCase())) return false;
+        if (filters.destination && !ride.to.toLowerCase().includes(filters.destination.toLowerCase())) return false;
+        if (filters.date && ride.date !== filters.date) return false;
+        if (filters.time && ride.time !== filters.time) return false;
+        if (filters.exclusiveTo !== "none" && ride.exclusiveTo !== filters.exclusiveTo) return false;
+        return true;
+      })
+    : availableRides.filter((ride) => ride.recommended);
+
+  const otherRides = availableRides.filter(ride => !recommendedRides.includes(ride));
+
+  const toggleExclusivity = (type: "women" | "men") => {
+    setFilters(prev => ({
+      ...prev,
+      exclusiveTo: prev.exclusiveTo === type ? "none" : type
+    }));
+  };
+
+  const handleRideRequest = (ride: AvailableRide) => {
+    const { created } = saveRequestedRide({
+      externalRideId: ride.id,
+      from: ride.from,
+      to: ride.to,
+      date: ride.date,
+      time: ride.time,
+      vehicleType: ride.vehicleType as "car" | "motorcycle",
+      totalSeats: ride.totalSeats,
+      availableSeats: ride.availableSeats,
+      price: ride.price,
+      notes: ride.notes,
+    });
+
+    toast.custom(() => (
+      <div className="pointer-events-auto flex w-[min(24rem,calc(100vw-2rem))] items-start gap-3 rounded-2xl border border-emerald-100 bg-white p-4 shadow-[0_18px_45px_-24px_rgba(5,150,105,0.5)]">
+        <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+          <CheckCircle2 className="h-4 w-4" />
+        </span>
+        <span className="flex flex-col gap-1">
+          <span className="font-medium text-gray-900">
+            {created ? "Solicitação enviada!" : "Solicitação já registrada"}
+          </span>
+          <span className="text-xs leading-relaxed text-gray-500">
+            Aguarde a aprovação do motorista.
+          </span>
+        </span>
+      </div>
+    ), {
+      duration: 3500,
+      unstyled: true,
+    });
+
+    setSelectedRide(null);
+    navigate("/acompanhar-carona?tipo=solicitadas");
+  };
+
+  const RideCard = ({ ride, isRecommended }: { ride: AvailableRide, isRecommended: boolean }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col h-full bg-white rounded-3xl p-5 sm:p-6 border border-gray-200 shadow-sm transition-all hover:shadow-md hover:border-green-400 cursor-pointer relative group"
+      onClick={() => setSelectedRide(ride)}
+    >
+      {/* Rota e Badge de Match */}
+      <div className="flex items-start justify-between gap-2 mb-5">
+        <div className="flex items-start gap-4">
+          <div className="flex flex-col items-center mt-1">
+            <div className="w-3 h-3 rounded-full border-2 border-gray-300 bg-white z-10"></div>
+            <div className="w-0.5 h-8 bg-gray-200 -my-1"></div>
+            <MapPin className="w-4 h-4 text-green-600 z-10" />
+          </div>
+          <div className="flex-1 space-y-3">
+            <div>
+              <p className="text-sm font-bold text-gray-900 truncate">{ride.from}</p>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Caronas disponíveis para você
-            </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Encontre caronas compartilhadas na sua rota e economize enquanto ajuda o planeta
-            </p>
-          </motion.div>
-
-          {/* Search and Filters */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200"
-          >
-            <div className="grid md:grid-cols-4 gap-4 mb-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  <MapPin className="w-4 h-4 inline mr-1 text-green-600" />
-                  Origem
-                </label>
-                <input
-                  type="text"
-                  value={filters.origin}
-                  onChange={(e) => setFilters({ ...filters, origin: e.target.value })}
-                  placeholder="De onde você sai?"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  <Navigation className="w-4 h-4 inline mr-1 text-green-600" />
-                  Destino
-                </label>
-                <select
-                  value={filters.destination}
-                  onChange={(e) => setFilters({ ...filters, destination: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  <option value="">Todos os destinos</option>
-                  {/* <option value="USF Sagrado">USF Sagrado</option>
-                  <option value="PUC-Campinas">PUC-Campinas</option>
-                  <option value="FACAMP">FACAMP</option> */}
-                  <option value="USF Sagrado">USF Sagrado</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  <Calendar className="w-4 h-4 inline mr-1 text-green-600" />
-                  Data
-                </label>
-                <input
-                  type="date"
-                  value={filters.date}
-                  onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  <Filter className="w-4 h-4" />
-                  Filtros
-                </button>
-              </div>
-            </div>
-
-            {showFilters && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="pt-4 border-t border-gray-200"
-              >
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={filters.womenOnly}
-                    onChange={(e) => setFilters({ ...filters, womenOnly: e.target.checked })}
-                    className="w-5 h-5 text-pink-600 border-pink-300 rounded focus:ring-pink-500"
-                  />
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-pink-600" />
-                    <span className="font-medium text-gray-900">Apenas caronas exclusivas para mulheres</span>
-                  </div>
-                </label>
-              </motion.div>
-            )}
-          </motion.div>
-
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Rides List */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Recommended Rides */}
-              {recommendedRides.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-green-600" />
-                    <h2 className="text-xl font-bold text-gray-900">Recomendadas para você</h2>
-                  </div>
-                  <div className="space-y-4">
-                    {recommendedRides.map((ride, index) => (
-                      <motion.div
-                        key={ride.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: index * 0.1 }}
-                        className="bg-white rounded-xl shadow-lg border-2 border-green-200 p-6 hover:shadow-xl transition-all relative overflow-hidden"
-                      >
-                        {/* Match Score Badge */}
-                        <div className="absolute top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
-                          <TrendingUp className="w-4 h-4" />
-                          {ride.matchScore}% match
-                        </div>
-
-                        <div className="flex gap-4">
-                          {/* Driver Avatar */}
-                          <div className="flex-shrink-0">
-                            <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                              {ride.driverInitials}
-                            </div>
-                            <div className="flex items-center justify-center gap-1 mt-1">
-                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                              <span className="text-xs font-medium text-gray-700">{ride.rating}</span>
-                            </div>
-                          </div>
-
-                          {/* Ride Info */}
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-3">
-                              <div>
-                                <h3 className="font-semibold text-gray-900 mb-1">{ride.driver}</h3>
-                                <div className="flex flex-wrap gap-1">
-                                  {ride.badges.map((badge) => (
-                                    <span
-                                      key={badge}
-                                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${badgeInfo[badge]?.color}`}
-                                    >
-                                      {badgeInfo[badge]?.icon} {badgeInfo[badge]?.label}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Route */}
-                            <div className="flex items-center gap-2 mb-3">
-                              <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" />
-                              <span className="font-medium text-gray-900">{ride.from}</span>
-                              <span className="text-gray-400">→</span>
-                              <span className="font-medium text-green-700">{ride.to}</span>
-                              {ride.womenOnly && (
-                                <span className="px-2 py-0.5 bg-pink-100 text-pink-700 text-xs rounded-full font-medium flex items-center gap-1">
-                                  <User className="w-3 h-3" />
-                                  Exclusiva para Mulheres
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Details */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-sm text-gray-600">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                <span>{new Date(ride.date).toLocaleDateString('pt-BR')}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                <span>{ride.time}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Navigation className="w-4 h-4" />
-                                <span>{ride.distance} • {ride.duration}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Users className="w-4 h-4" />
-                                <span>{ride.availableSeats.length} {ride.availableSeats.length === 1 ? 'vaga' : 'vagas'}</span>
-                              </div>
-                            </div>
-
-                            {/* Recurring */}
-                            {ride.recurring.length > 0 && (
-                              <div className="flex items-center gap-2 mb-3">
-                                <span className="text-xs text-gray-600">Recorrente:</span>
-                                <div className="flex gap-1">
-                                  {["seg", "ter", "qua", "qui", "sex"].map((day) => (
-                                    <span
-                                      key={day}
-                                      className={`w-6 h-6 rounded flex items-center justify-center text-xs font-medium ${
-                                        ride.recurring.includes(day)
-                                          ? "bg-green-500 text-white"
-                                          : "bg-gray-100 text-gray-400"
-                                      }`}
-                                    >
-                                      {day.charAt(0).toUpperCase()}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Notes */}
-                            {ride.notes && (
-                              <p className="text-sm text-gray-600 mb-3 italic">"{ride.notes}"</p>
-                            )}
-
-                            {/* Visual Seat Selector */}
-                            <div className="bg-gray-50 rounded-lg p-4 mb-3">
-                              <div className="flex items-center gap-2 mb-2">
-                                {React.createElement(vehicleIcons[ride.vehicleType] || Car, { className: "w-4 h-4 text-gray-700" })}
-                                <span className="text-sm font-medium text-gray-700">
-                                  {ride.vehicleType === "car" && "Carro"}
-                                  {ride.vehicleType === "suv" && "SUV/Van"}
-                                  {ride.vehicleType === "motorcycle" && "Moto"}
-                                </span>
-                              </div>
-                              <p className="text-xs text-gray-600 mb-2">
-                                {ride.vehicleModel} • Placa {ride.licensePlate}
-                              </p>
-                              <div className="flex flex-wrap gap-2">
-                                {Array.from({ length: ride.totalSeats }, (_, i) => i + 1).map((seatNum) => (
-                                  <div
-                                    key={seatNum}
-                                    className={`flex items-center justify-center w-10 h-10 rounded-lg text-xs font-medium ${
-                                      ride.availableSeats.includes(seatNum)
-                                        ? "bg-green-500 text-white"
-                                        : ride.occupiedSeats.includes(seatNum)
-                                        ? "bg-gray-300 text-gray-600"
-                                        : "bg-gray-200 text-gray-500"
-                                    }`}
-                                  >
-                                    {seatNum}
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="flex items-center gap-4 mt-2 text-xs">
-                                <div className="flex items-center gap-1">
-                                  <div className="w-3 h-3 bg-green-500 rounded"></div>
-                                  <span className="text-gray-600">Disponível</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <div className="w-3 h-3 bg-gray-300 rounded"></div>
-                                  <span className="text-gray-600">Ocupado</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-gray-200">
-                              <div className="flex items-center gap-2">
-                                <DollarSign className="w-5 h-5 text-green-600" />
-                                <span className="text-2xl font-bold text-green-600">R$ {ride.price.toFixed(2)}</span>
-                                <span className="text-sm text-gray-500">por pessoa</span>
-                              </div>
-                              <div className="flex gap-2 sm:ml-auto">
-                                <a
-                                  href={`https://wa.me/55${ride.whatsapp}?text=Olá! Vi sua carona de ${ride.from} para ${ride.to} no dia ${new Date(ride.date).toLocaleDateString('pt-BR')} às ${ride.time}. Gostaria de mais informações!`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex-1 sm:flex-none px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                                >
-                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                                  </svg>
-                                  WhatsApp
-                                </a>
-                                  <Link
-                                    to="/acompanhar-carona"
-                                    className="flex-1 sm:flex-none px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all shadow-md flex items-center justify-center gap-2"
-                                  >
-                                    <Check className="w-4 h-4" />
-                                    Solicitar
-                                  </Link>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Other Rides */}
-              {otherRides.length > 0 && (
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Outras caronas disponíveis</h2>
-                  <div className="space-y-4">
-                    {otherRides.map((ride, index) => (
-                      <motion.div
-                        key={ride.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: (recommendedRides.length + index) * 0.1 }}
-                        className="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition-all"
-                      >
-                        <div className="flex gap-4">
-                          <div className="flex-shrink-0">
-                            <div className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                              {ride.driverInitials}
-                            </div>
-                            <div className="flex items-center justify-center gap-1 mt-1">
-                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                              <span className="text-xs font-medium text-gray-700">{ride.rating}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-3">
-                              <div>
-                                <h3 className="font-semibold text-gray-900 mb-1">{ride.driver}</h3>
-                                <div className="flex flex-wrap gap-1">
-                                  {ride.badges.map((badge) => (
-                                    <span
-                                      key={badge}
-                                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${badgeInfo[badge]?.color}`}
-                                    >
-                                      {badgeInfo[badge]?.icon} {badgeInfo[badge]?.label}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2 mb-3">
-                              <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" />
-                              <span className="font-medium text-gray-900">{ride.from}</span>
-                              <span className="text-gray-400">→</span>
-                              <span className="font-medium text-green-700">{ride.to}</span>
-                              {ride.womenOnly && (
-                                <span className="px-2 py-0.5 bg-pink-100 text-pink-700 text-xs rounded-full font-medium flex items-center gap-1">
-                                  <User className="w-3 h-3" />
-                                  Exclusiva para Mulheres
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-sm text-gray-600">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                <span>{new Date(ride.date).toLocaleDateString('pt-BR')}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                <span>{ride.time}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Navigation className="w-4 h-4" />
-                                <span>{ride.distance} • {ride.duration}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Users className="w-4 h-4" />
-                                <span>{ride.availableSeats.length} {ride.availableSeats.length === 1 ? 'vaga' : 'vagas'}</span>
-                              </div>
-                            </div>
-
-                            {ride.notes && (
-                              <p className="text-sm text-gray-600 mb-3 italic">"{ride.notes}"</p>
-                            )}
-
-                            <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                              <div className="flex items-center gap-2">
-                                <DollarSign className="w-5 h-5 text-green-600" />
-                                <span className="text-2xl font-bold text-green-600">R$ {ride.price.toFixed(2)}</span>
-                                <span className="text-sm text-gray-500">por pessoa</span>
-                              </div>
-                              <button className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all shadow-md flex items-center gap-2">
-                                <Check className="w-4 h-4" />
-                                Solicitar
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {filteredRides.length === 0 && (
-                <div className="bg-white rounded-xl shadow-md border border-gray-200 p-12 text-center">
-                  <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Nenhuma carona encontrada</h3>
-                  <p className="text-gray-600 mb-6">Tente ajustar seus filtros ou crie uma nova carona</p>
-                  <Link
-                    to="/criar-carona"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg"
-                  >
-                    <Sparkles className="w-5 h-5" />
-                    Criar Carona
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Security Info */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-white rounded-xl shadow-md border border-gray-200 p-6 mt-12"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <Shield className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-semibold text-gray-900">Segurança Garantida</h3>
-                </div>
-                <ul className="space-y-3 text-sm text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Identidades verificadas de todos os usuários</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Dados anônimos até confirmação mútua</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Sistema de avaliação por badges</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Opção exclusiva para mulheres</span>
-                  </li>
-                </ul>
-              </motion.div>
-
-              {/* Create Ride CTA */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white"
-              >
-                <h3 className="font-semibold mb-2">Não encontrou sua rota?</h3>
-                <p className="text-sm mb-4 opacity-90">
-                  Crie sua própria carona e ajude outros estudantes enquanto economiza!
-                </p>
-                <Link
-                  to="/criar-carona"
-                  className="block w-full px-4 py-2 bg-white text-green-600 rounded-lg font-medium hover:bg-gray-100 transition-colors text-center"
-                >
-                  Oferecer Carona
-                </Link>
-              </motion.div>
-
-              {/* Impact Stats */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="bg-white rounded-xl shadow-md border border-gray-200 p-6"
-              >
-                <h3 className="font-semibold text-gray-900 mb-4">Impacto da Comunidade</h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="text-2xl font-bold text-green-600">2.5k+</div>
-                    <div className="text-sm text-gray-600">Estudantes ativos</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-blue-600">3.2 ton</div>
-                    <div className="text-sm text-gray-600">CO₂ economizado</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-purple-600">10k+</div>
-                    <div className="text-sm text-gray-600">Caronas realizadas</div>
-                  </div>
-                </div>
-              </motion.div>
+            <div>
+              <p className="text-sm font-bold text-gray-900 truncate">{ride.to}</p>
             </div>
           </div>
         </div>
+        
+        {/* Match Exato ou Recomendada à direita */}
+        {isRecommended ? (
+          <div className="bg-green-50 text-green-700 px-3 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 border border-green-100 flex-shrink-0">
+            <TrendingUp className="w-3 h-3" /> {isSearching ? "MATCH EXATO" : "RECOMENDADA"}
+          </div>
+        ) : (
+          <div className="text-right flex flex-col items-end gap-1">
+            <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded-lg text-xs font-bold">
+              <Clock className="w-3 h-3" /> {ride.time}
+            </span>
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1 block">
+               Data: {ride.date.split('-').reverse().join('/')}
+            </span>
+          </div>
+        )}
       </div>
 
+      <div className="h-px w-full bg-gray-100 mb-4" />
+
+      {/* Badges */}
+      <div className="flex flex-wrap gap-2 mb-6">
+         {ride.exclusiveTo === "women" && (
+            <span className="px-3 py-1 bg-pink-50 text-pink-700 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 border border-pink-100">
+              <User className="w-3 h-3" /> Apenas Mulheres
+            </span>
+         )}
+         {ride.exclusiveTo === "men" && (
+            <span className="px-3 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 border border-blue-100">
+              <User className="w-3 h-3" /> Apenas Homens
+            </span>
+         )}
+         <span className={`px-3 py-1 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 border ${
+           ride.availableSeats.length > 0 ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"
+         }`}>
+           <Users className="w-3 h-3" /> {ride.availableSeats.length} vagas
+         </span>
+         <span className="px-3 py-1 bg-gray-50 text-gray-600 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 border border-gray-200">
+           {React.createElement(vehicleIcons[ride.vehicleType] || Car, { className: "w-3 h-3" })}
+           {ride.vehicleType === "car" ? "Carro" : "Moto"}
+         </span>
+      </div>
+
+      {/* Footer do Card */}
+      <div className="flex items-end justify-between mt-auto">
+        <div>
+           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-0.5">Contribuição</span>
+           <span className="text-xl font-black text-green-600">R$ {ride.price.toFixed(2)}</span>
+        </div>
+        <button className="text-sm font-bold text-gray-500 group-hover:text-green-600 transition-colors flex items-center gap-1">
+          Ver detalhes <span className="text-lg leading-none group-hover:translate-x-1 transition-transform">&rarr;</span>
+        </button>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 font-sans relative flex flex-col">
+      <Header />
+      
+      <style>{`
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0; position: absolute; right: 0; width: 100%; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
+      {/* CONTAINER PRINCIPAL ALINHADO (max-w-5xl) */}
+      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto flex-grow w-full relative z-10">
+        
+        {/* CABEÇALHO */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+            Caronas Disponíveis para Você
+          </h1>
+          <p className="text-gray-600 max-w-xl mx-auto text-sm sm:text-base">
+            Encontre caronas compartilhadas na sua rota e economize enquanto ajuda o planeta
+          </p>
+        </motion.div>
+
+        {/* ÁREA DE BUSCA (Mesma largura do grid de caronas abaixo) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
+          className="bg-white rounded-[2rem] shadow-xl p-5 sm:p-8 border border-white w-full mb-12 relative z-10"
+        >
+          {/* BLOCO DE ROTA */}
+          <div className="relative mb-6">
+            <div className="absolute left-[31px] top-[40px] bottom-[40px] w-0.5 bg-gray-200 rounded-full z-0 hidden sm:block"></div>
+            <div className="space-y-3 relative z-10">
+              
+              {/* Origem */}
+              <div className="relative flex flex-col sm:flex-row sm:items-center rounded-2xl p-2 bg-gray-50 border border-gray-200 focus-within:border-green-500 transition-colors duration-300">
+                <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-white shadow-sm text-green-600 shrink-0 hidden sm:flex border border-gray-100">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div className="flex-1 px-4 py-2 sm:py-0">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-0.5">Origem</label>
+                  <input
+                    type="text" value={filters.origin} onChange={(e) => setFilters({ ...filters, origin: e.target.value })}
+                    placeholder="Sua localização atual"
+                    className="w-full bg-transparent border-none p-0 focus:ring-0 text-gray-900 placeholder-gray-400 font-medium outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Destino */}
+              <div className="relative flex flex-col sm:flex-row sm:items-center rounded-2xl p-2 mt-2 sm:mt-0 bg-gray-50 border border-gray-200 focus-within:border-green-500 transition-colors duration-300">
+                <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-green-600 text-white shadow-sm shrink-0 hidden sm:flex">
+                  <Navigation className="w-5 h-5" />
+                </div>
+                <div className="flex-1 px-4 py-2 sm:py-0">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-0.5">Destino</label>
+                  <input
+                    type="text" value={filters.destination} onChange={(e) => setFilters({ ...filters, destination: e.target.value })}
+                    placeholder="Ex: USF Sagrado"
+                    className="w-full bg-transparent border-none p-0 focus:ring-0 text-gray-900 placeholder-gray-400 font-medium outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px w-full bg-gray-100 mb-6" />
+
+          {/* DATA E HORA */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div className="bg-gray-50 border border-gray-200 focus-within:border-green-500 rounded-2xl px-4 py-3.5 flex items-center gap-3 transition-colors duration-300">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <div className="flex-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-0.5">Data</label>
+                <input
+                  type="date" value={filters.date} onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-gray-900 text-sm font-medium outline-none relative z-10"
+                />
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 focus-within:border-green-500 rounded-2xl px-4 py-3.5 flex items-center gap-3 transition-colors duration-300">
+              <Clock className="w-4 h-4 text-gray-400" />
+              <div className="flex-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-0.5">Horário</label>
+                <input
+                  type="time" value={filters.time} onChange={(e) => setFilters({ ...filters, time: e.target.value })}
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-gray-900 text-sm font-medium outline-none relative z-10"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Apenas Mulheres / Apenas Homens */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
+            <button
+              type="button" onClick={() => toggleExclusivity("women")}
+              className={`py-3.5 rounded-xl border transition-all flex items-center justify-center gap-2 ${
+                filters.exclusiveTo === "women"
+                  ? "bg-pink-50 border-pink-300 text-pink-700"
+                  : "bg-gray-50 border-transparent text-gray-600 hover:bg-gray-100 border-gray-200"
+              }`}
+            >
+              <User className="w-4 h-4" />
+              <span className="font-bold text-sm">Apenas Mulheres</span>
+            </button>
+            <button
+              type="button" onClick={() => toggleExclusivity("men")}
+              className={`py-3.5 rounded-xl border transition-all flex items-center justify-center gap-2 ${
+                filters.exclusiveTo === "men"
+                  ? "bg-blue-50 border-blue-300 text-blue-700"
+                  : "bg-gray-50 border-transparent text-gray-600 hover:bg-gray-100 border-gray-200"
+              }`}
+            >
+              <User className="w-4 h-4" />
+              <span className="font-bold text-sm">Apenas Homens</span>
+            </button>
+          </div>
+        </motion.div>
+
+        {/* CONTEÚDO PRINCIPAL: CARONAS ALINHADAS COM O FILTRO */}
+        <div className="w-full space-y-8">
+          
+          {/* Header com ícone de privacidade garantida à direita */}
+          <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+            <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
+              {isSearching ? "Resultados da Busca" : "Visão Geral"}
+            </h2>
+            <button 
+              onClick={() => setShowSecurityModal(true)}
+              className="flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors"
+            >
+              <Shield className="w-3.5 h-3.5" /> Privacidade Garantida
+            </button>
+          </div>
+          
+          {recommendedRides.length > 0 && (
+            <div>
+              <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-green-600" /> 
+                {isSearching ? "Matches Exatos" : "Recomendadas para você"}
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {recommendedRides.map((ride) => <RideCard key={ride.id} ride={ride} isRecommended={true} />)}
+              </div>
+            </div>
+          )}
+
+          {isSearching && recommendedRides.length === 0 && (
+            <div className="py-6 text-center flex flex-col items-center">
+              <h3 className="text-lg font-bold text-gray-900 mb-1">Nenhuma carona exata encontrada</h3>
+              <p className="text-sm text-gray-500">Não encontramos uma carona com esses filtros exatos, mas confira as opções ativas abaixo!</p>
+            </div>
+          )}
+
+          {otherRides.length > 0 && (
+            <div>
+              <h2 className="text-base font-bold text-gray-900 mb-4 text-gray-500">
+                {isSearching ? "Outras Opções Ativas" : "Todas as caronas disponíveis"}
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {otherRides.map((ride) => <RideCard key={ride.id} ride={ride} isRecommended={false} />)}
+              </div>
+            </div>
+          )}
+
+          {availableRides.length === 0 && (
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-12 text-center">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">O feed está vazio</h3>
+                <p className="text-sm text-gray-500 mb-6">Nenhuma carona foi oferecida ainda. Seja o primeiro!</p>
+                <Link to="/criar-carona" className="inline-flex items-center gap-2 px-8 py-3 bg-green-600 text-white font-bold rounded-full hover:bg-green-700 transition-colors">
+                  Oferecer Carona
+                </Link>
+              </div>
+          )}
+        </div>
+      </div>
+
+      {/* MODAL DETALHES DO TRAJETO */}
+      <AnimatePresence>
+        {selectedRide && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border border-gray-100 relative"
+            >
+              <button 
+                onClick={() => setSelectedRide(null)} 
+                className="absolute top-5 right-5 z-20 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="p-6 sm:p-8 pb-0 overflow-y-auto hide-scrollbar">
+                
+                <h3 className="font-bold text-gray-900 text-2xl mb-8 mt-2 pr-12">Detalhes do Trajeto</h3>
+
+                <div className="grid sm:grid-cols-2 gap-8">
+                  {/* Lado Esquerdo do Modal (Rota e Mapa) */}
+                  <div className="space-y-6">
+                    {/* Bloco Mapa (Placeholder) */}
+                    <div className="w-full h-40 bg-gray-100 rounded-2xl relative overflow-hidden flex items-center justify-center border border-gray-200">
+                      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cartographer.png')] opacity-30"></div>
+                      <div className="relative z-10 px-4 py-2 bg-white/80 backdrop-blur border border-gray-200 rounded-full text-[10px] font-bold text-gray-600 uppercase tracking-wider flex items-center gap-2">
+                        <Map className="w-4 h-4 text-green-600" /> Integração Maps (Em Breve)
+                      </div>
+                    </div>
+
+                    {/* Rota Textual */}
+                    <div className="flex items-start gap-4 px-2">
+                      <div className="flex flex-col items-center mt-1">
+                        <div className="w-3 h-3 rounded-full border-2 border-gray-400 bg-white"></div>
+                        <div className="w-0.5 h-12 bg-gray-200 my-1"></div>
+                        <MapPin className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div className="flex-1 space-y-6">
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Saindo de</p>
+                          <p className="font-bold text-gray-900 text-base">{selectedRide.from}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Chegando em</p>
+                          <p className="font-bold text-gray-900 text-base">{selectedRide.to}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Lado Direito do Modal (Regras, Vagas, Info) */}
+                  <div className="space-y-5">
+                    <div className="flex items-center justify-between bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                       <span className="text-sm font-bold text-gray-600 flex items-center gap-2"><Clock className="w-4 h-4"/> Horário de Partida</span>
+                       <span className="text-base font-black text-gray-900">{selectedRide.time}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200 flex flex-col justify-center items-center">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-2">Vagas Livres</span>
+                        <div className="flex gap-1.5 justify-center">
+                          {Array.from({ length: selectedRide.totalSeats }, (_, i) => i + 1).map((seatNum) => (
+                            <div key={seatNum} className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                                selectedRide.availableSeats.includes(seatNum) ? "bg-green-500 text-white" : "bg-gray-200 text-gray-400"
+                              }`}
+                            >
+                              {seatNum}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200 flex flex-col justify-center items-center">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">Veículo</span>
+                        <div className="flex items-center gap-1.5 text-gray-900 font-bold text-sm">
+                           {React.createElement(vehicleIcons[selectedRide.vehicleType] || Car, { className: "w-5 h-5 text-gray-500" })}
+                           {selectedRide.vehicleType === "car" ? "Carro" : "Moto"}
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedRide.notes && (
+                      <div>
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-2">Condições da Viagem</span>
+                        <p className="text-sm text-gray-700 bg-gray-50 p-4 rounded-2xl border border-gray-200 font-medium leading-relaxed">
+                          "{selectedRide.notes}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-8 mb-6 bg-blue-50 border border-blue-100 rounded-2xl p-4 flex gap-3">
+                  <Shield className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-blue-900 mb-1">Contato Protegido</p>
+                    <p className="text-sm text-blue-800 font-medium leading-relaxed">
+                      Ao realizar a solicitação, seu perfil será informado ao motorista.
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Rodapé CTA */}
+              <div className="p-6 sm:px-8 border-t border-gray-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4">
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider"><DollarSign className="w-4 h-4"/> Contribuição</span>
+                  <span className="text-3xl font-black text-green-600">R$ {selectedRide.price.toFixed(2)}</span>
+                </div>
+                <button
+                  onClick={() => handleRideRequest(selectedRide)}
+                  className="w-full sm:w-auto px-10 py-3.5 bg-green-600 text-white rounded-full font-bold text-sm hover:bg-green-700 active:scale-95 transition-all"
+                >
+                  Solicitar Vaga
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL DE PRIVACIDADE E SEGURANÇA (EXPLICAÇÃO DO FLUXO) */}
+      <AnimatePresence>
+        {showSecurityModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden p-6 sm:p-8 relative border border-gray-100"
+            >
+              <button 
+                onClick={() => setShowSecurityModal(false)} 
+                className="absolute top-5 right-5 z-20 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-5">
+                <Shield className="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">Como funciona?</h3>
+              
+              <div className="space-y-6">
+                <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-sm shrink-0 text-gray-600">1</div>
+                  <div>
+                    <h4 className="font-bold text-sm mb-0.5 text-gray-900">Visibilidade Restrita</h4>
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                      A carona fica pública apenas no nível de rota e condições da viagem (origem, destino, data, hora, vagas, valor e restrições).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-sm shrink-0 text-gray-600">2</div>
+                  <div>
+                    <h4 className="font-bold text-sm mb-0.5 text-gray-900">Solicitação</h4>
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                      Você solicita a carona. O motorista recebe uma notificação com a informação de quem solicitou e pode aprovar ou recusar.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-sm shrink-0 text-gray-600">3</div>
+                  <div>
+                    <h4 className="font-bold text-sm mb-0.5 text-gray-900">Revelação e Decisão</h4>
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                      Se o motorista aprovar, o solicitante recebe uma notificação com o perfil do motorista e pode confirmar ou desistir.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 rounded-full bg-green-50 border border-green-200 flex items-center justify-center shrink-0">
+                    <Check className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm mb-0.5 text-green-700">Match Fechado!</h4>
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                      Só depois da dupla confirmação o match é fechado e os dois podem acessar o contato por WhatsApp.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <button onClick={() => setShowSecurityModal(false)} className="w-full mt-8 py-3 bg-gray-100 text-gray-900 font-bold rounded-full hover:bg-gray-200 transition-colors">
+                Entendi
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* MINI-GAME: MATCH DE CARONAS */}
+      <RideMatchGame />
       <Footer />
     </div>
   );
