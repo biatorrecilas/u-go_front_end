@@ -21,11 +21,11 @@ export function SmartMatching() {
               Recomendação Inteligente
             </div>
             
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 leading-tight">
               O match perfeito para o seu trajeto universitário
             </h2>
             
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-base md:text-lg text-gray-600 mb-8 leading-relaxed">
               Nosso algoritmo inteligente analisa cruzamentos de rotas, horários e preferências para conectar você a pessoas que fazem caminhos como o seu.
             </p>
 
@@ -85,7 +85,7 @@ export function SmartMatching() {
               className="absolute bg-white p-5 rounded-2xl shadow-2xl border border-green-100 w-72 z-20 ml-20 mt-16"
             >
               <div className="absolute -top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> 98% Match
+                <CheckCircle2 className="w-3 h-3" /> Alta compatibilidade
               </div>
               
               <div className="flex items-center gap-3 mb-4">

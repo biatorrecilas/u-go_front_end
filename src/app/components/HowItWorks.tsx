@@ -5,20 +5,20 @@ const steps = [
   {
     icon: EyeOff,
     number: "01",
-    title: "Visibilidade Restrita",
-    description: "A carona fica pública apenas no nível de rota e condições da viagem (origem, destino, data, hora, vagas, valor e observações).",
+    title: "Ofereça ou Encontre",
+    description: "Como motorista, você publica a rota e as condições da viagem. Como passageiro, você busca uma carona compatível e vê somente as informações públicas.",
   },
   {
     icon: Bell,
     number: "02",
-    title: "Solicitação",
-    description: "Você solicita a carona como passageiro. O motorista recebe uma notificação com a informação de quem solicitou e pode aprovar ou recusar.",
+    title: "Passageiro Solicita",
+    description: "O passageiro solicita uma vaga. O motorista recebe uma notificação, pode abrir o perfil de quem solicitou e decide se aprova ou recusa.",
   },
   {
     icon: UserCheck,
     number: "03",
-    title: "Revelação e Decisão",
-    description: "Se o motorista aprovar, o solicitante recebe uma notificação com o perfil do motorista e pode confirmar ou desistir.",
+    title: "Motorista Aprova",
+    description: "Se o motorista aprovar, o passageiro recebe uma notificação, consulta o perfil do motorista e pode confirmar a vaga ou desistir.",
   },
   {
     icon: MessageCircle,
@@ -39,11 +39,11 @@ export function HowItWorks() {
           transition={{ duration: 0.6 }}
           className="text-center mb-20"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Simples, rápido e feito para estudantes!
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Um processo sequencial de dupla confirmação desenhado para garantir privacidade e confiança antes da viagem.
+          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Com a mesma conta, você pode oferecer uma carona como motorista ou buscar e solicitar uma vaga como passageiro. A dupla confirmação protege os dois lados antes da viagem.
           </p>
         </motion.div>
 
@@ -71,7 +71,7 @@ export function HowItWorks() {
               >
                 {/* Header do passo: Número gigante e Ícone, com fundo branco para quebrar a linha */}
                 <div className="flex items-center gap-4 mb-6 bg-white pr-4 self-start">
-                  <div className="text-6xl lg:text-8xl font-black text-green-300 tracking-tighter transition-transform duration-300 group-hover:scale-105 group-hover:text-green-400">
+                  <div className="text-5xl lg:text-6xl font-black text-green-300 tracking-tighter transition-transform duration-300 group-hover:scale-105 group-hover:text-green-400">
                     {step.number}
                   </div>
                   <div className="flex items-center justify-center w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-gray-50 border border-gray-100 text-gray-400 shadow-sm transition-colors duration-300 group-hover:bg-green-50 group-hover:text-green-500 group-hover:border-green-200">
@@ -81,7 +81,7 @@ export function HowItWorks() {
                 
                 {/* Textos sem card em volta, visual limpo e direto */}
                 <div className="pl-1 lg:pl-2">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                     {step.title}
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">

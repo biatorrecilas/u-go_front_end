@@ -1,5 +1,6 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { 
   Leaf, 
@@ -7,23 +8,43 @@ import {
   Heart, 
   Users, 
   Award,
-  TreePine,
   Lightbulb,
   Shield,
   TrendingUp,
   Globe,
+  TreePine,
   Zap,
   Sparkles,
   Linkedin // Ícone adicionado
 } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { fetchPlatformStats, type PlatformStats } from "../auth";
+
+const formatNumber = (value: number | undefined, suffix = "") =>
+  value === undefined ? "—" : `${new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(value)}${suffix}`;
 
 export function About() {
+  const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void fetchPlatformStats()
+      .then((data) => {
+        if (active) setPlatformStats(data);
+      })
+      .catch(() => {
+        if (active) setPlatformStats(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const stats = [
-    { value: "2.5k+", label: "Estudantes ativos", icon: Users },
-    { value: "10k+", label: "Caronas realizadas", icon: TrendingUp },
-    { value: "3.2 ton", label: "CO₂ economizado", icon: Leaf },
-    { value: "156", label: "Árvores equivalentes", icon: TreePine },
+    { value: formatNumber(platformStats?.active_users), label: "Estudantes ativos", icon: Users },
+    { value: formatNumber(platformStats?.completed_rides), label: "Caronas concluídas", icon: TrendingUp },
+    { value: formatNumber(platformStats?.co2_saved_kg, " kg"), label: "CO₂ potencialmente evitado", icon: Leaf },
+    { value: formatNumber(platformStats?.confirmed_matches), label: "Matches confirmados", icon: Award },
   ];
 
   const values = [
@@ -147,7 +168,7 @@ export function About() {
     {
       year: "2026.2",
       title: "Expansão",
-      description: "Alcançar usuários ativos e consolidação da comunidade na USF",
+      description: "Alcançar usuários ativos e consolidação da comunidade na USF - Universidade São Francisco Câmpus Sagrado Coração",
       icon: TrendingUp,
     },
     {
@@ -163,6 +184,9 @@ export function About() {
       icon: Globe,
     },
   ];
+
+  const treeEquivalentCount = platformStats?.urban_tree_equivalent_count;
+  const treeEquivalentLabel = treeEquivalentCount === 1 ? "árvore equivalente" : "árvores equivalentes";
 
   return (
     <div className="min-h-screen bg-white">
@@ -182,14 +206,14 @@ export function About() {
             className="text-center mb-16"
           >
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Transformando mobilidade em{" "}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+              Transformando Mobilidade em{" "}
               <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                sustentabilidade
+                Sustentabilidade
               </span>
             </h1>
             
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Somos uma plataforma que conecta estudantes universitários para compartilhar caronas,
               reduzir custos e construir um futuro mais verde, um trajeto de cada vez.
             </p>
@@ -210,12 +234,9 @@ export function About() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-                  className="bg-white rounded-xl shadow-lg p-6 text-center"
+                  className="p-6 text-center"
                 >
-                  <div className="bg-gradient-to-br from-green-500 to-emerald-600 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</p>
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</p>
                   <p className="text-sm text-gray-600">{stat.label}</p>
                 </motion.div>
               );
@@ -238,10 +259,10 @@ export function About() {
                 <div className="bg-green-100 p-3 rounded-lg">
                   <Target className="w-6 h-6 text-green-600" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">Nossa Missão</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Nossa Missão</h2>
               </div>
               
-              <p className="text-lg text-gray-700 mb-6">
+              <p className="text-base text-gray-700 mb-6 leading-relaxed">
                 Criar uma rede de mobilidade sustentável que conecte estudantes universitários,
                 promovendo economia, redução de emissões e fortalecimento da comunidade acadêmica.
               </p>
@@ -259,8 +280,8 @@ export function About() {
                 <div>
                   <p className="font-medium text-gray-900 mb-1">Impacto Real</p>
                   <p className="text-sm text-gray-700">
-                    Cada carona compartilhada economiza em média 3.5kg de CO₂, equivalente
-                    a plantar meia árvore por mês!
+                    A estimativa atual é calculada a partir da distância de caronas concluídas
+                    por passageiro. Fator utilizado: {platformStats?.co2_methodology ?? "indisponível no momento"}.
                   </p>
                 </div>
               </div>
@@ -286,11 +307,24 @@ export function About() {
                   <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 rounded-lg">
                     <TreePine className="w-5 h-5 text-white" />
                   </div>
-                  <span className="font-bold text-gray-900 text-lg">156 árvores</span>
+                  <span className="font-bold text-gray-900 text-lg">
+                    {formatNumber(treeEquivalentCount)} {treeEquivalentLabel}
+                  </span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  Impacto equivalente de caronas compartilhadas
+                  Captura anual equivalente ao CO₂ potencialmente evitado. Não representa árvores plantadas.
                 </p>
+                {platformStats?.urban_tree_equivalent_source_url ? (
+                  <a
+                    href={platformStats.urban_tree_equivalent_source_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-block text-xs font-semibold text-green-700 hover:underline"
+                    title={platformStats.urban_tree_equivalent_methodology}
+                  >
+                    Ver metodologia da EPA
+                  </a>
+                ) : null}
               </div>
             </motion.div>
           </div>
@@ -307,10 +341,10 @@ export function About() {
             transition={{ duration: 0.8 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Nossos Valores
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Princípios que guiam cada decisão e ação que tomamos
             </p>
           </motion.div>
@@ -349,10 +383,10 @@ export function About() {
             transition={{ duration: 0.8 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Nossa Jornada
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-base md:text-lg text-gray-600 leading-relaxed">
               Do início até onde estamos hoje e para onde vamos
             </p>
           </motion.div>
@@ -383,7 +417,7 @@ export function About() {
                         </span>
                         <div className="h-px flex-1 bg-gradient-to-r from-green-200 to-transparent"></div>
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{milestone.title}</h3>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{milestone.title}</h3>
                       <p className="text-gray-600">{milestone.description}</p>
                     </div>
                   </motion.div>
@@ -404,11 +438,11 @@ export function About() {
             transition={{ duration: 0.8 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Conheça Nossa Equipe
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Pessoas apaixonadas trabalhando para tornar a mobilidade mais sustentável
+            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Estudantes de Engenharia de Computação da Universidade São Francisco
             </p>
           </motion.div>
 

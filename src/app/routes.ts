@@ -1,43 +1,79 @@
-import { createBrowserRouter, redirect } from "react-router";
-import { Home } from "./pages/Home";
-import { Profile } from "./pages/Profile";
-import { Login } from "./pages/Login";
-import { About } from "./pages/About";
-import { CreateRide } from "./pages/CreateRide";
-import { FindRides } from "./pages/FindRides";
-import { RideTracking } from "./pages/RideTracking";
+import { Fragment, createElement, useEffect } from "react";
+import { createBrowserRouter, Outlet, redirect, useLocation } from "react-router";
+
+function ScrollToTop() {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname, search]);
+
+  return null;
+}
+
+function RootLayout() {
+  return createElement(
+    Fragment,
+    null,
+    createElement(ScrollToTop),
+    createElement(Outlet),
+  );
+}
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    Component: Home,
-  },
-  {
-    path: "/perfil",
-    Component: Profile,
-  },
-  {
-    path: "/cadastro",
-    loader: () => redirect("/login?mode=signup"),
-  },
-  {
-    path: "/login",
-    Component: Login,
-  },
-  {
-    path: "/sobre",
-    Component: About,
-  },
-  {
-    path: "/criar-carona",
-    Component: CreateRide,
-  },
-  {
-    path: "/caronas",
-    Component: FindRides,
-  },
-  {
-    path: "/acompanhar-carona",
-    Component: RideTracking,
+    Component: RootLayout,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({ Component: (await import("./pages/Home")).Home }),
+      },
+      {
+        path: "perfil",
+        lazy: async () => ({ Component: (await import("./pages/Profile")).Profile }),
+      },
+      {
+        path: "perfil/:userId",
+        lazy: async () => ({ Component: (await import("./pages/Profile")).Profile }),
+      },
+      {
+        path: "cadastro",
+        loader: () => redirect("/login?mode=signup"),
+      },
+      {
+        path: "login",
+        lazy: async () => ({ Component: (await import("./pages/Login")).Login }),
+      },
+      {
+        path: "sobre",
+        lazy: async () => ({ Component: (await import("./pages/About")).About }),
+      },
+      {
+        path: "criar-carona",
+        lazy: async () => ({ Component: (await import("./pages/CreateRide")).CreateRide }),
+      },
+      {
+        path: "caronas",
+        lazy: async () => ({ Component: (await import("./pages/FindRides")).FindRides }),
+      },
+      {
+        path: "acompanhar-carona",
+        lazy: async () => ({ Component: (await import("./pages/RideTracking")).RideTracking }),
+      },
+      {
+        path: "termos",
+        lazy: async () => {
+          const { Legal } = await import("./pages/Legal");
+          return { Component: () => createElement(Legal, { type: "terms" }) };
+        },
+      },
+      {
+        path: "privacidade",
+        lazy: async () => {
+          const { Legal } = await import("./pages/Legal");
+          return { Component: () => createElement(Legal, { type: "privacy" }) };
+        },
+      },
+    ],
   },
 ]);

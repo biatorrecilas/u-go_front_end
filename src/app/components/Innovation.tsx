@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Trophy, Award, Target, Zap, Heart, Sprout } from "lucide-react";
 import { motion } from "motion/react";
+import type { PlatformStats } from "../auth";
 
 const badges = [
   {
@@ -13,35 +14,35 @@ const badges = [
   {
     icon: Heart,
     name: "Carona Solidária",
-    description: "10 caronas oferecidas",
+    description: "Reconhecimento por oferecer caronas à comunidade",
     color: "from-pink-400 to-rose-500",
     iconColor: "text-pink-500",
   },
   {
     icon: Zap,
     name: "Relâmpago Verde",
-    description: "Confirmou 50 caronas",
+    description: "Reconhecimento por confirmar caronas com agilidade",
     color: "from-yellow-400 to-amber-500",
     iconColor: "text-amber-500",
   },
   {
     icon: Target,
     name: "Pontual",
-    description: "100% pontualidade",
+    description: "Reconhecimento por atitudes pontuais",
     color: "from-blue-400 to-cyan-500",
     iconColor: "text-cyan-500",
   },
   {
     icon: Award,
     name: "Comunidade Ativa",
-    description: "Membro há 6 meses",
+    description: "Reconhecimento por participação contínua",
     color: "from-purple-400 to-violet-500",
     iconColor: "text-violet-500",
   },
   {
     icon: Trophy,
     name: "Eco Campeão",
-    description: "Economizou 100kg de CO₂",
+    description: "Reconhecimento pelo impacto ambiental acumulado",
     color: "from-orange-400 to-red-500",
     iconColor: "text-red-500",
   },
@@ -62,7 +63,7 @@ interface Particle {
 
 function BadgeCard({ badge, index }: { badge: any; index: number }) {
   const [particles, setParticles] = useState<Particle[]>([]);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Função para criar UMA nova partícula com trajetória aleatória
   const addParticle = () => {
@@ -162,7 +163,7 @@ function BadgeCard({ badge, index }: { badge: any; index: number }) {
         >
           <badge.icon className="w-8 h-8 text-white" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+        <h3 className="text-base font-semibold text-gray-900 text-center mb-2">
           {badge.name}
         </h3>
         <p className="text-sm text-gray-600 text-center">
@@ -173,7 +174,7 @@ function BadgeCard({ badge, index }: { badge: any; index: number }) {
   );
 }
 
-export function Innovation() {
+export function Innovation({ stats }: { stats: PlatformStats | null }) {
   return (
     <section
       id="innovation"
@@ -187,10 +188,10 @@ export function Innovation() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16 relative z-20"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Aqui as Conquistas são Reconhecidas!
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Sem estrelas ou comentários. Ganhe badges exclusivas por suas ações
             positivas e construa uma reputação visual e gamificada.
           </p>
@@ -211,7 +212,7 @@ export function Innovation() {
             transition={{ duration: 0.6 }}
             className="bg-white p-8 rounded-2xl shadow-lg relative z-20"
           >
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
               Perfil Personalizado
             </h3>
             <p className="text-gray-600 mb-4">
@@ -229,7 +230,9 @@ export function Innovation() {
               <div className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
                 Comunidade
               </div>
-              <div className="text-xs text-gray-500">+12 badges</div>
+              <div className="text-xs text-gray-500">
+                {stats ? `${stats.badge_feedback_count} reconhecimentos registrados` : "Dados sendo atualizados"}
+              </div>
             </div>
           </motion.div>
           <motion.div
@@ -239,7 +242,7 @@ export function Innovation() {
             transition={{ duration: 0.6 }}
             className="bg-white p-8 rounded-2xl shadow-lg relative z-20"
           >
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
               Rotas Anônimas
             </h3>
             <p className="text-gray-600 mb-4">
@@ -251,7 +254,7 @@ export function Innovation() {
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-sm font-medium text-gray-700">
-                  3 rotas próximas disponíveis
+                  {stats ? `${stats.active_rides} caronas ativas disponíveis` : "Caronas ativas sendo carregadas"}
                 </span>
               </div>
               <p className="text-xs text-gray-500 ml-6">

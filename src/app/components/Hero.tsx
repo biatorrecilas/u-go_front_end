@@ -1,7 +1,12 @@
 import { motion } from "motion/react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import type { PlatformStats } from "../auth";
 
-export function Hero() {
+const formatCount = (value: number | undefined, maximumFractionDigits = 0) => value === undefined
+  ? "—"
+  : new Intl.NumberFormat("pt-BR", { maximumFractionDigits }).format(value);
+
+export function Hero({ stats }: { stats: PlatformStats | null }) {
   return (
     <section className="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 relative overflow-hidden">
       {/* Decorative elements */}
@@ -15,27 +20,27 @@ export function Hero() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 sm:mb-6 leading-tight">
               Caronas universitárias{" "}
               <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">inteligentes</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8">
+            <p className="text-base md:text-lg text-gray-600 mb-7 leading-relaxed">
               Conecte-se com colegas da sua universidade, economize dinheiro e
               ajude o meio ambiente. A forma mais fácil de compartilhar caronas
               no campus.
             </p>
-            <div className="mt-8 flex items-center gap-8">
-              <div>
-                <div className="text-3xl font-bold text-gray-900">10k+</div>
-                <div className="text-sm text-gray-600">Usuários ativos</div>
+            <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-6" aria-label="Números atuais da comunidade U-Go">
+              <div className="min-w-0 text-center">
+                <div className="text-xl font-bold text-gray-900 sm:text-2xl">{formatCount(stats?.active_users)}</div>
+                <div className="text-xs text-gray-600 sm:text-sm">Usuários ativos</div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900">50k+</div>
-                <div className="text-sm text-gray-600">Caronas realizadas</div>
+              <div className="min-w-0 text-center">
+                <div className="text-xl font-bold text-gray-900 sm:text-2xl">{formatCount(stats?.completed_rides)}</div>
+                <div className="text-xs text-gray-600 sm:text-sm">Caronas concluídas</div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-gray-900">4.8</div>
-                <div className="text-sm text-gray-600">Avaliação</div>
+              <div className="min-w-0 text-center">
+                <div className="text-xl font-bold text-gray-900 sm:text-2xl">{formatCount(stats?.co2_saved_kg, 1)} kg</div>
+                <div className="text-xs text-gray-600 sm:text-sm">CO₂ evitado</div>
               </div>
             </div>
           </motion.div>
@@ -53,7 +58,7 @@ export function Hero() {
                 className="w-full h-auto"
               />
             </div>
-            <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg">
+            <div className="absolute bottom-3 left-3 bg-white p-4 rounded-xl shadow-lg sm:-bottom-6 sm:-left-6">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl">
                   ✓
@@ -63,7 +68,7 @@ export function Hero() {
                     Carona confirmada!
                   </div>
                   <div className="text-sm text-gray-600">
-                    Maria vai te buscar às 18h
+                    Contato liberado após confirmação mútua
                   </div>
                 </div>
               </div>

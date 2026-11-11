@@ -40,10 +40,10 @@ export function Features() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Tecnologia que Conecta com Segurança
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Recursos pensados para sua privacidade e sustentabilidade. Uma nova forma de compartilhar caronas.
           </p>
         </motion.div>
@@ -61,7 +61,7 @@ export function Features() {
               <feature.icon className="w-8 h-8 text-green-600 shrink-0 mt-0.5" />
               
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   {feature.title}
                 </h3>
                 <p className="text-gray-600">{feature.description}</p>

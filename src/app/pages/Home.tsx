@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "../components/Header";
 import { Hero } from "../components/Hero";
 import { Features } from "../components/Features";
@@ -9,9 +9,25 @@ import { Innovation } from "../components/Innovation";
 import { Testimonials } from "../components/Testimonials";
 import { Footer } from "../components/Footer";
 import { useLocation } from "react-router";
+import { fetchPlatformStats, type PlatformStats } from "../auth";
 
 export function Home() {
   const location = useLocation();
+  const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    void fetchPlatformStats()
+      .then((stats) => {
+        if (isMounted) setPlatformStats(stats);
+      })
+      .catch(() => {
+        if (isMounted) setPlatformStats(null);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!location.hash) {
@@ -34,12 +50,12 @@ export function Home() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <Hero />
+      <Hero stats={platformStats} />
       <Features />
       <HowItWorks />
-      <SavingsChart />
+      <SavingsChart stats={platformStats} />
       <SmartMatching />
-      <Innovation />
+      <Innovation stats={platformStats} />
       <Footer />
     </div>
   );

@@ -8,7 +8,7 @@ export function Footer() {
         {/* Bloco Superior: Identidade e Missão */}
         <div className="flex flex-col gap-3 max-w-3xl">
           <Link to="/" className="w-fit">
-            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
               U-Go
             </span>
           </Link>
@@ -23,17 +23,17 @@ export function Footer() {
           
           {/* Esquerda: Links Rápidos */}
           <nav className="flex flex-wrap justify-center md:justify-start items-center gap-3 text-sm font-normal text-gray-400">
-            <a href="#" className="hover:text-green-500 transition-colors">
+            <a href="mailto:contato@u-go.app" className="hover:text-green-500 transition-colors">
               Feedback
             </a>
             <span className="text-gray-600 text-[10px]">&#8226;</span>
-            <a href="#" className="hover:text-green-500 transition-colors">
+            <Link to="/termos" className="hover:text-green-500 transition-colors">
               Termos de Uso
-            </a>
+            </Link>
             <span className="text-gray-600 text-[10px]">&#8226;</span>
-            <a href="#" className="hover:text-green-500 transition-colors">
+            <Link to="/privacidade" className="hover:text-green-500 transition-colors">
               Política de Privacidade
-            </a>
+            </Link>
           </nav>
 
           {/* Direita: Copyright */}

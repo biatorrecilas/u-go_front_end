@@ -14,7 +14,14 @@ import {
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { clearSession, getInitials, type NotificationItem, useAuthSession } from "../auth";
+import {
+  getInitials,
+  logoutSession,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type NotificationItem,
+  useAuthSession,
+} from "../auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
@@ -32,7 +39,9 @@ export function Header() {
   const session = useAuthSession();
   const isHome = location.pathname === "/";
   const isAuthenticated = Boolean(session);
-  const unreadCount = session?.notifications.filter((notification) => notification.isNew).length ?? 0;
+  const notifications = session?.notifications ?? [];
+  const unreadCount = notifications.filter((notification) => notification.isNew).length;
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const scrollToSection = (id: string) => {
     if (isHome) {
@@ -45,10 +54,19 @@ export function Header() {
     setIsMenuOpen(false);
   };
 
-  const handleLogout = () => {
-    clearSession();
-    setIsMenuOpen(false);
-    navigate("/");
+  const handleLogout = async () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+    try {
+      await logoutSession();
+      setIsMenuOpen(false);
+      navigate("/");
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const getNotificationPresentation = (notification: NotificationItem) => {
@@ -80,6 +98,14 @@ export function Header() {
       };
     }
 
+    if (kind === "match") {
+      return { icon: Search, iconClassName: "bg-violet-100 text-violet-700" };
+    }
+
+    if (kind === "ride_update" || kind === "status") {
+      return { icon: Route, iconClassName: "bg-orange-100 text-orange-700" };
+    }
+
     return {
       icon: UserRoundPlus,
       iconClassName: "bg-amber-100 text-amber-700",
@@ -91,7 +117,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
               U-Go
             </span>
           </Link>
@@ -156,25 +182,51 @@ export function Header() {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-80">
-                    <DropdownMenuLabel>Notificações</DropdownMenuLabel>
+                    <DropdownMenuLabel className="flex items-center justify-between gap-3">
+                      <span>Notificações</span>
+                      {unreadCount > 0 ? (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            void markAllNotificationsRead();
+                          }}
+                          className="text-xs font-medium text-emerald-700 hover:underline"
+                        >
+                          Marcar todas como lidas
+                        </button>
+                      ) : null}
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {session?.notifications.map((notification) => {
-                      const { icon: NotificationIcon, iconClassName } = getNotificationPresentation(notification);
+                    {notifications.length > 0 ? (
+                      notifications.map((notification) => {
+                        const { icon: NotificationIcon, iconClassName } = getNotificationPresentation(notification);
 
-                      return (
-                        <DropdownMenuItem key={notification.id} asChild className="items-start">
-                          <Link to={notification.href} className="flex items-start gap-3">
-                            <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full ${iconClassName}`}>
-                              <NotificationIcon className="w-4 h-4" />
-                            </span>
-                            <span className="flex flex-col gap-1">
-                              <span className="font-medium text-gray-900">{notification.title}</span>
-                              <span className="text-xs leading-relaxed text-gray-500">{notification.description}</span>
-                            </span>
-                          </Link>
-                        </DropdownMenuItem>
-                      );
-                    })}
+                        return (
+                          <DropdownMenuItem key={notification.id} asChild className="items-start">
+                            <Link
+                              to={notification.href}
+                              onClick={() => {
+                                if (notification.isNew) void markNotificationRead(notification.id);
+                              }}
+                              className={`flex items-start gap-3 ${notification.isNew ? "bg-emerald-50/60" : ""}`}
+                            >
+                              <span className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full ${iconClassName}`}>
+                                <NotificationIcon className="w-4 h-4" />
+                              </span>
+                              <span className="flex flex-col gap-1">
+                                <span className="font-medium text-gray-900">{notification.title}</span>
+                                <span className="text-xs leading-relaxed text-gray-500">{notification.description}</span>
+                              </span>
+                            </Link>
+                          </DropdownMenuItem>
+                        );
+                      })
+                    ) : (
+                      <div className="px-4 py-6 text-center text-sm text-gray-500">
+                        Não há notificações no momento.
+                      </div>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -212,9 +264,9 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={handleLogout} className="text-red-600 focus:text-red-600">
+                    <DropdownMenuItem onSelect={() => void handleLogout()} className="text-red-600 focus:text-red-600">
                       <LogOut className="w-4 h-4" />
-                      Sair
+                      {isLoggingOut ? "Saindo..." : "Sair"}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -324,36 +376,54 @@ export function Header() {
                     <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-900">
                       <Bell className="w-4 h-4" />
                       Notificações
+                      {unreadCount > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => void markAllNotificationsRead()}
+                          className="ml-auto text-xs font-medium text-emerald-700 hover:underline"
+                        >
+                          Marcar lidas
+                        </button>
+                      ) : null}
                     </div>
                     <div className="space-y-3">
-                      {session?.notifications.slice(0, 2).map((notification) => {
-                        const { icon: NotificationIcon, iconClassName } = getNotificationPresentation(notification);
+                      {notifications.length > 0 ? (
+                        notifications.slice(0, 2).map((notification) => {
+                          const { icon: NotificationIcon, iconClassName } = getNotificationPresentation(notification);
 
-                        return (
-                          <Link
-                            key={notification.id}
-                            to={notification.href}
-                            onClick={() => setIsMenuOpen(false)}
-                            className="flex items-start gap-3 rounded-xl bg-white px-3 py-2 text-sm text-gray-600 shadow-sm"
-                          >
-                            <span className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full ${iconClassName}`}>
-                              <NotificationIcon className="w-4 h-4" />
-                            </span>
-                            <span>
-                              <div className="font-medium text-gray-900">{notification.title}</div>
-                              <div className="text-xs text-gray-500">{notification.description}</div>
-                            </span>
-                          </Link>
-                        );
-                      })}
+                          return (
+                            <Link
+                              key={notification.id}
+                              to={notification.href}
+                              onClick={() => {
+                                setIsMenuOpen(false);
+                                if (notification.isNew) void markNotificationRead(notification.id);
+                              }}
+                              className={`flex items-start gap-3 rounded-xl px-3 py-2 text-sm text-gray-600 shadow-sm ${notification.isNew ? "bg-emerald-50" : "bg-white"}`}
+                            >
+                              <span className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full ${iconClassName}`}>
+                                <NotificationIcon className="w-4 h-4" />
+                              </span>
+                              <span>
+                                <div className="font-medium text-gray-900">{notification.title}</div>
+                                <div className="text-xs text-gray-500">{notification.description}</div>
+                              </span>
+                            </Link>
+                          );
+                        })
+                      ) : (
+                        <div className="rounded-xl bg-white px-3 py-4 text-sm text-gray-500 shadow-sm">
+                          Não há notificações no momento.
+                        </div>
+                      )}
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={handleLogout}
+                    onClick={() => void handleLogout()}
                     className="rounded-full border border-red-200 px-4 py-3 text-left font-medium text-red-600 transition-colors hover:bg-red-50"
                   >
-                    Sair
+                    {isLoggingOut ? "Saindo..." : "Sair"}
                   </button>
                 </>
               )}

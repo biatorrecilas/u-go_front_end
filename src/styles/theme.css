@@ -135,6 +135,23 @@
 
   html {
     font-size: var(--font-size);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   h1 {
@@ -177,5 +194,18 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+}
+
+/*
+ * Em telas pequenas, controles permanecem em 16px para evitar zoom automático
+ * em navegadores móveis. A hierarquia visual é reduzida nos títulos, não nos
+ * campos que precisam continuar confortáveis para leitura e digitação.
+ */
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
   }
 }

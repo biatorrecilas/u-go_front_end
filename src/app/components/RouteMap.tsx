@@ -69,10 +69,10 @@ export function RouteMap() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Rotas para a USF Sagrado - Campinas e região
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Descubra as rotas mais utilizadas pela nossa comunidade universitária
           </p>
         </motion.div>
@@ -86,7 +86,7 @@ export function RouteMap() {
             transition={{ duration: 0.6 }}
             className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200"
           >
-            <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Navigation className="w-5 h-5 text-green-600" />
               Mapa de Rotas Convergentes
             </h3>

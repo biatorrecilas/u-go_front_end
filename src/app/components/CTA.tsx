@@ -22,30 +22,30 @@ export function CTA() {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-5">
             Transforme sua ida para a USF
           </h2>
-          <p className="text-lg md:text-xl text-green-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-green-100 mb-8 max-w-2xl mx-auto leading-relaxed">
             Cadastre-se com seu e-mail institucional, divida os custos do trajeto com segurança e faça parte da revolução verde no campus.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link
               to="/cadastro"
-              className="px-8 py-4 bg-white text-green-700 rounded-xl hover:bg-green-50 transition-all text-lg font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1"
+              className="px-7 py-3.5 bg-white text-green-700 rounded-xl hover:bg-green-50 transition-all text-base font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1"
             >
               Começar Agora
             </Link>
             <Link
               to="/sobre"
-              className="px-8 py-4 bg-transparent border-2 border-white/30 text-white rounded-xl hover:bg-white/10 hover:border-white transition-all text-lg font-semibold"
+              className="px-7 py-3.5 bg-transparent border-2 border-white/30 text-white rounded-xl hover:bg-white/10 hover:border-white transition-all text-base font-semibold"
             >
               Saiba Mais
             </Link>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-green-100 font-medium">
-            <span className="text-sm">Junte-se a mais de 2.500 estudantes</span>
+            <span className="text-sm">Faça parte da comunidade universitária U-Go</span>
             <ArrowRight className="w-4 h-4" />
           </div>
         </motion.div>
